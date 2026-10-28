@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Car Price Prediction</title>
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* ---- Brutalist theme: thick borders, hard shadows, no rounding, no scrolling ---- */
+
+        :root {
+            --ink: #000;
+            --paper: #f4f1ea;
+            --accent: #ffe600;
+            --hot: #ff3b00;
+            --border: 3px solid var(--ink);
+            --shadow: 6px 6px 0 var(--ink);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            color: var(--ink);
+            background-color: var(--paper);
+            background-image:
+                linear-gradient(rgba(0, 0, 0, .07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, .07) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            padding: 20px 26px 26px 20px;
+            gap: 26px;
+        }
+
+        /* ---------- Left: yellow intro block ---------- */
+
+        .left {
+            flex: 0 0 30%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 28px;
+            background: var(--accent);
+            border: var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .left h1 {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: clamp(1.8rem, 3.4vw, 3.2rem);
+            line-height: 1;
+            text-transform: uppercase;
+            margin: 0 0 18px;
+        }
+
+        .left p {
+            font-size: 0.85rem;
+            margin: 0 0 20px;
+            padding-left: 12px;
+            border-left: 6px solid var(--ink);
+        }
+
+        .left ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .left ul li {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 4px 8px;
+            background: var(--ink);
+            color: var(--accent);
+        }
+
+        /* ---------- Right: form card ---------- */
+
+        .right {
+            flex: 1;
+            display: flex;
+            min-width: 0;
+        }
+
+        .card {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: clamp(14px, 2.5vh, 28px) 26px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card h2 {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            margin: 0 0 clamp(10px, 2vh, 20px);
+            padding-bottom: 8px;
+            border-bottom: var(--border);
+        }
+
+        form {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(8px, 2vh, 20px) 18px;
+            align-content: space-evenly;
+            min-height: 0;
+        }
+
+        .input-box {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .input-box label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .input-box input,
+        .input-box select {
+            font: inherit;
+            font-size: 0.85rem;
+            height: clamp(32px, 5vh, 44px);
+            padding: 0 10px;
+            color: var(--ink);
+            background: var(--paper);
+            border: var(--border);
+            border-radius: 0;
+            outline: none;
+            transition: transform .08s, box-shadow .08s;
+        }
+
+        .input-box input:focus,
+        .input-box select:focus {
+            background: var(--accent);
+            box-shadow: 4px 4px 0 var(--ink);
+            transform: translate(-2px, -2px);
+        }
+
+        .predict-btn {
+            grid-column: 1 / -1;
+            margin-top: 6px;
+            padding: clamp(10px, 2vh, 16px);
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #fff;
+            background: var(--hot);
+            border: var(--border);
+            border-radius: 0;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform .08s, box-shadow .08s;
+        }
+
+        .predict-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0 var(--ink);
+        }
+
+        .predict-btn:active {
+            transform: translate(6px, 6px);
+            box-shadow: none;
+        }
+
+        footer {
+            display: none;
+        }
+
+        .result {
+            grid-column: 1 / -1;
+            padding: 10px 14px;
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            text-align: center;
+            background: var(--accent);
+            border: var(--border);
+        }
+
+        .result:empty {
+            display: none;
+        }
+
+        .result.is-error {
+            color: #fff;
+            background: var(--ink);
+            font-size: 0.85rem;
+        }
+
+        /* Small screens: stack and shrink so everything still fits without scrolling */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding: 10px 16px 16px 10px;
+                gap: 14px;
+            }
+            .left {
+                flex: 0 0 auto;
+                padding: 12px 16px;
+            }
+            .left h1 {
+                font-size: 1.4rem;
+                margin: 0;
+            }
+            .left p,
+            .left ul {
+                display: none;
+            }
+            .right {
+                flex: 1;
+                min-height: 0;
+            }
+            .card {
+                padding: 12px 14px;
+            }
+            .card h2 {
+                font-size: 1rem;
+            }
+            form {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px 10px;
+            }
+            .input-box label {
+                font-size: 0.62rem;
+            }
+            .input-box input,
+            .input-box select {
+                height: 30px;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="left">
+
+            <h1>🚗 Car Price Prediction</h1>
+
+            <p>
+                Predict the resale value of your car using our Machine Learning model.
+            </p>
+
+            <ul>
+
+                <li>✔ Random Forest Regression</li>
+
+                <li>✔ Automated Data Preprocessing</li>
+
+                <li>✔ Scikit-learn Pipeline</li>
+
+                <li>✔ Real-time Prediction</li>
+
+            </ul>
+
+        </div>
+
+        <div class="right">
+
+            <div class="card">
+
+                <h2>Enter Car Details</h2>
+
+                <form id="form">
+
+                    <div class="input-box">
+
+                        <label>Car Name</label>
+
+                        <input
+                            type="text"
+                            name="name"
+                            placeholder="Example : Hyundai i20 Sportz"
+                            required>
+
+                    </div>
+
+                    <div class="input-box">
+
+                        <label>Location</label>
+
+                        <select name="location">
+
+                            <option>Ahmedabad</option>
+                            <option>Bangalore</option>
+                            <option>Chennai</option>
+                            <option>Coimbatore</option>
+                            <option>Delhi</option>
+                            <option>Hyderabad</option>
+                            <option>Jaipur</option>
+                            <option>Kochi</option>
+                            <option>Kolkata</option>
+                            <option>Mumbai</option>
+                            <option>Pune</option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="input-box">
+
+                        <label>Year</label>
+
+                        <input
+                            type="number"
+                            name="year"
+                            min="1995"
+                            max="2026"
+                            required>
+
+                    </div>
+
+                    <div class="input-box">
+
+                        <label>Kilometers Driven</label>
+
+                        <input
+                            type="number"
+                            name="kilometers"
+                            placeholder="45000"
+                            required>
+
+                    </div>
+
+                    <div class="input-box">
+
+                        <label>Fuel Type</label>
+
+                        <select name="fuel">
+
+                            <option>CNG</option>
+                            <option>Diesel</option>
+                            <option>Electric</option>
+                            <option>LPG</option>
+                            <option>Petrol</option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="input-box">
+
+                        <label>Transmission</label>
+
+                        <select name="transmission">
+
+                            <option>Automatic</option>
+                            <option>Manual</option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="input-box">
+
+                        <label>Owner Type</label>
+
+                        <select name="owner">
+
+                            <option>First</option>
+                            <option>Second</option>
+                            <option>Third</option>
+                            <option>Fourth &amp; Above</option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="input-box">
+
+                        <label>Mileage</label>
+
+                        <input
+                            type="text"
+                            name="mileage"
+                            placeholder="18.5 kmpl"
+                            required>
+
+                    </div>
+
+                    <div class="input-box">
+
+                        <label>Engine</label>
+
+                        <input
+                            type="text"
+                            name="engine"
+                            placeholder="1197 CC"
+                            required>
+
+                    </div>
+
+                    <div class="input-box">
+
+                        <label>Power</label>
+
+                        <input
+                            type="text"
+                            name="power"
+                            placeholder="81.86 bhp"
+                            required>
+
+                    </div>
+
+                    <div class="input-box">
+
+                        <label>Seats</label>
+
+                        <input
+                            type="number"
+                            name="seats"
+                            min="2"
+                            max="10"
+                            required>
+
+                    </div>
+
+                    <button class="predict-btn" type="submit">
+
+                        Predict Price
+
+                    </button>
+
+                    <output class="result" id="result"></output>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        <footer>
+
+            <p>
+                Car Price Prediction System |
+                Built with ❤️ using FastAPI, Scikit-Learn Pipeline &
+                Random Forest Regressor
+            </p>
+
+        </footer>
+
+    </div>
+
+    <script>
+        const API_URL = "http://127.0.0.1:8000/prediction";
+
+        const form = document.querySelector("form");
+        const button = form.querySelector(".predict-btn");
+        const result = document.getElementById("result");
+
+        // Leave blank optional fields as null instead of ""
+        const orNull = (value) => value.trim() === "" ? null : value.trim();
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const f = form.elements;
+
+            // Must match CarFeatures in main.py
+            const payload = {
+                Name: f.name.value.trim(),
+                Location: f.location.value,
+                Year: parseInt(f.year.value, 10),
+                Kilometers_Driven: parseFloat(f.kilometers.value),
+                Fuel_Type: f.fuel.value,
+                Transmission: f.transmission.value,
+                Owner_Type: f.owner.value,
+                Mileage: orNull(f.mileage.value),
+                Engine: orNull(f.engine.value),
+                Power: orNull(f.power.value),
+                Seats: f.seats.value === "" ? null : parseFloat(f.seats.value)
+            };
+
+            button.disabled = true;
+            button.textContent = "Predicting...";
+            result.classList.remove("is-error");
+            result.textContent = "";
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    // FastAPI puts error info in "detail" (string, or a list for validation errors)
+                    const detail = Array.isArray(data.detail)
+                        ? data.detail.map((d) => `${d.loc.at(-1)}: ${d.msg}`).join(", ")
+                        : data.detail;
+                    throw new Error(detail || `Server error ${response.status}`);
+                }
+
+                result.textContent = `₹ ${data.predicted_price.toFixed(2)} Lakhs`;
+            } catch (error) {
+                result.classList.add("is-error");
+                result.textContent = error instanceof TypeError
+                    ? "Cannot reach the backend. Is FastAPI running on http://127.0.0.1:8000?"
+                    : error.message;
+            } finally {
+                button.disabled = false;
+                button.textContent = "Predict Price";
+            }
+        });
+    </script>
+
+</body>
+
+</html>
