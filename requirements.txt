@@ -1,0 +1,8 @@
+fastapi==0.141.1
+uvicorn==0.53.0
+pydantic==2.13.4
+pandas==2.3.3
+numpy==2.3.5
+# must match the version used to train car_price_pipeline.pkl, or the model won't load
+scikit-learn==1.7.2
+joblib==1.5.2
