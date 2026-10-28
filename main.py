@@ -1,5 +1,6 @@
 from pathlib import Path 
 from fastapi import FastAPI,HTTPException
+from fastapi.responses import FileResponse
 import joblib
 from mnop import changes  # needed so joblib can unpickle the pipeline
 import pandas as pd 
@@ -27,6 +28,10 @@ class CarFeatures(BaseModel):
     Seats: float | None
 
   
+
+@app.get("/")
+def frontend():
+  return FileResponse(Path(__file__).parent / "index.html")
 
 @app.post("/home")
 def home_page():

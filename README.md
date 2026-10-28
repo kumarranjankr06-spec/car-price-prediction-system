@@ -36,11 +36,13 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-The API runs at `http://127.0.0.1:8000`; interactive docs are at `http://127.0.0.1:8000/docs`.
-
-Then open `index.html` in a browser (for example with the VS Code **Live Server** extension), fill the form and click **Predict Price**.
+Then open `http://127.0.0.1:8000/` in a browser, fill the form and click **Predict Price**. The backend serves `index.html` itself, so no separate frontend server is needed. Interactive API docs are at `http://127.0.0.1:8000/docs`.
 
 ## API
+
+### `GET /`
+
+Serves the frontend (`index.html`).
 
 ### `POST /prediction`
 
@@ -84,7 +86,7 @@ The notebook also needs `matplotlib`, `seaborn` and `jupyter`, which are not in 
 
 ## Deploying on Render
 
-### Backend (Web Service)
+Frontend and backend are deployed together as one **Web Service**: FastAPI serves `index.html` at `/`, and the page calls `/prediction` on the same server.
 
 | Setting | Value |
 |---|---|
@@ -93,24 +95,13 @@ The notebook also needs `matplotlib`, `seaborn` and `jupyter`, which are not in 
 | Start Command | `uvicorn main:app --host 0.0.0.0 --port $PORT` |
 | Environment variable | `PYTHON_VERSION` = `3.13.9` |
 
+Live: https://car-price-prediction-system-6mrm.onrender.com
+
 Notes:
 
 - `car_price_pipeline.pkl` must be in the repo, since the server loads it at startup. It is about 80 MB: GitHub accepts it (limit 100 MB) but warns about it. Lowering `n_estimators` in the notebook makes it smaller.
 - `scikit-learn` is pinned to the version the model was trained with. If you upgrade it, retrain the model.
 - On the free plan the service sleeps when idle, so the first request after a while can take up to a minute.
-
-### Frontend (Static Site)
-
-| Setting | Value |
-|---|---|
-| Build Command | *(leave empty)* |
-| Publish Directory | `.` |
-
-Before deploying, change `API_URL` in the `<script>` at the bottom of `index.html` from `http://127.0.0.1:8000/prediction` to your backend's Render URL, for example:
-
-```js
-const API_URL = "https://your-backend.onrender.com/prediction";
-```
 
 ## Tech stack
 
